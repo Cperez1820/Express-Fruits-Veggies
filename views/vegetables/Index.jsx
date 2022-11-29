@@ -7,17 +7,20 @@ class Index extends React.Component {
         return (
             <div>
                 <h1>Vegetables Index Page</h1>
+                <nav>
+                    <a href="/vegetables/new">Create new Vegetable</a>
+                </nav>
                 <ul>
-                    {vegetables.map((vegetables, i )=> {
+                    {vegetables.map((vegetable, i )=> {
                         return (
                             // <li key =  {i}> is making "Warning: Each child in a list should have a unique "key" prop." go away 
-                            <li key =  {i}>
+                            <li>
                                 The{''}
-                                <a href={`/vegetables/${i}`}>{vegetables.name}
+                                <a style={{color:"lightblue"}}href={`/vegetables/${vegetable._id}`}>{vegetable.name}
                                 </a>
                                 {''}
-                                is {vegetables.color} <br></br>
-                                {vegetables.readyToEat
+                                is {vegetable.color} <br></br>
+                                {vegetable.readyToEat
                                 ? `It is ready to eat`
                                 : `It is not ready to eat`}
                                 <br />

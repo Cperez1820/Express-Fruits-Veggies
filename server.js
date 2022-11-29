@@ -1,33 +1,146 @@
+require("dotenv").config()
 const express = require("express")
 const app = express()
 const PORT = 3000
-const fruits = require("./models/fruits")
 const reactViews = require('express-react-views')
-const vegetables = require("./models2/vegetables")
+const mongoose = require('mongoose')
+const methodOverride = require('method-override')
+const fruitsController = require('./controllers/fruitController')
 
+//=========== Connection to Database ====================
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+mongoose.connection.once("open", ()=>{
+  console.log("connected to mongo");
+})
+
+// To see if MONGO_URI is working  (the )
+// console.log(process.env.MONGO_URI);
+
+
+// Setup Engine
 // app.use(express.static("public "))
 app.set("view engine", "jsx")
 app.engine("jsx", reactViews.createEngine())
 
-
-app.get("/fruits", (req, res) => {
-  res.render('Index', {fruits})
+//when building middleware
+app.use((req, res, next) =>{
+  console.log('I run for all routes');
+  next()
 })
 
-app.get("/vegetables", (req, res) => {
-    res.render('vegetables/Index', {vegetables})
-  })
+// when using built in middleware
+app.use(express.urlencoded({extended:false}));
+app.use(methodOverride("_method"))
+app.use(express.static('public'))
+//======== Routes ==============
 
-app.get("/fruits/:indexOfFruit", (req, res) => {
-    res.render("fruits/Show", fruits[req.params.indexOfFruit])
-// Old code 
-    // res.render('Show', {
-    // fruit: fruits[req.params.indexOfFruit]
-  })
+app.use('/fruits', fruitsController)
+ app.use('/vetgetables', fruitsController)
+
+
+//EVERYTHING BELLOW IS BEFORE WE SETUP THE controllers folder!!
+// app.get("/fruits", (req, res) => {
+//   fruits.find({}, (error, allFruits) =>{
+//    if (!error) {
+//     res.status(200).render("fruits/Index", {
+//       fruits: allFruits
+//     })
+//    } else {
+//     res.status(400).send(error)
+//    }
+//   })
+// })
+
+// app.get("/vegetables", (req, res) => {
+//   vegetables.find({}, (error, allVegetables) => {
+//     if(!error) {
+//       res.status(200).render("vegetables/Index", {
+//         vegetables: allVegetables
+//       })
+//     } else {
+//       res.status(400).send(error)
+//     }
+//   })  
+// })
+
+
+// app.get("/fruits/new", (req, res) => {
+//     res.render("fruits/New")
+//   })
+
+//   app.get("/vegetables/new", (req, res) => {
+//     res.render("vegetables/New")
+//   })
+
+// app.post("/fruits", (req, res) =>{
+//   console.log("2. controller");
+//   if(req.body.readyToEat === "on"){
+//     req.body.readyToEat = true
+//   } else {
+//     req.body.readyToEat = false
+//   }
+// fruits.create(req.body, (error, createdFruit) =>
+// {
+//   if (!error) {
+//     // redirects after creating fruit, to the Index page
+//     res.status(200).redirect("/fruits")
+//     } else {
+//       res.status(400).redirect(error)
+//     }
+//   })
+// })
+
+// app.post("/vegetables", (req, res) =>{
+//   console.log(req.body);
+//   if(req.body.readyToEat === "on"){
+//     req.body.readyToEat = true
+//   } else {
+//     req.body.readyToEat = false
+//   }
+// fruits.create(req.body, (error, createdFruit) =>
+// {
+//   if(!error) {
+//     res.status(200).redirect("/fruits")
+//   } else {
+//     res.status(400).redirect(error)
+//   }
+//  })
+// })
+
+// app.get("/fruits/:id", (req, res) => {
+//     Fruit.findById(req.params.id, (error, foundFruit) =>{
+//       if (!error) {
+//         res
+//           .status(200)
+//             .render("fruits/Show", {
+//               fruit: foundFruit
+//             })
+//       } else {
+//           res
+//             .status(400)
+//             .send(error)
+//       }
+//     })
+//   })
   
-  app.get("/vegetables/:indexOfVegetables", (req, res) => {
-  res.render('vegetables/Show', vegetables[req.params.indexOfVegetables])
-  })
+//   app.get("/vegetables/:id", (req, res) => {
+//   Vegetable.findById(req.params.id, (error, foundVegetable) =>{
+//     if(!error) {
+//       res
+//         .status(200)
+//           .render("vegetables/show", {
+//             vegetable: foundVegetable
+//           })
+//     } else {
+//         res
+//           .status(400)
+//           .send(error)
+//     }
+//   })
+// })
 
 
 app.listen(PORT, () => { 
@@ -94,3 +207,13 @@ app.listen(PORT, () => {
 
 // map is loop  that returns a new array after then loop. 
 // map returns a new array after the loop rather then for each which would not return the array 
+
+
+// Our MongoDB information is a secret so we need to set up Environment Variables
+
+// Install dotenvnode package
+// Update .gitignoreto include .env (always do this before you commit anything in .env)
+// touch the .envfile
+// lets add our connection string into the .env
+// update our server.jsto add our require('dotenv').config()to the very top of the file
+// this places every kvp in our .envinto a javascript object called process.env
